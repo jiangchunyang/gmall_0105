@@ -59,6 +59,17 @@
             <artifactId>guava</artifactId>
             <version>20.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.searchbox</groupId>
+            <artifactId>jest-common</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

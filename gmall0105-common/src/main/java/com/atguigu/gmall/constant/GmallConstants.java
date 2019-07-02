@@ -9,4 +9,6 @@ public class GmallConstants {
     public static final String KAFKA_TOPIC_ORDER_DETAIL="GMALL_ORDER_DETAIL";
 
     public static final String ES_INDEX_COUPON_ALERT="gmall0105_coupon_alert";
+    public static final String ES_INDEX_SALE_DETAIL="gmall0105_sale_detail";
+
 }

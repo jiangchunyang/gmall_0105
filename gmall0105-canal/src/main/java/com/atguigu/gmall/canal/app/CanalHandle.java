@@ -6,6 +6,7 @@ import com.atguigu.gmall.canal.util.MyKafkaSender;
 import com.atguigu.gmall.constant.GmallConstants;
 
 import java.util.List;
+import java.util.Random;
 
 public class CanalHandle {
 
@@ -43,6 +44,12 @@ public class CanalHandle {
             for (CanalEntry.Column column : afterColumnsList) {
                 System.out.println(column.getName() + "-->" + column.getValue());
                 jsonObject.put(column.getName(), column.getValue());
+            }
+
+            try {
+                Thread.sleep(new Random().nextInt(5)*1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
             MyKafkaSender.send(kafkaTopic, jsonObject.toJSONString());

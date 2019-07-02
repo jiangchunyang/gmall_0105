@@ -1,6 +1,9 @@
 package com.atguigu.gmall0105.publisher.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.atguigu.gmall0105.publisher.bean.Option;
+import com.atguigu.gmall0105.publisher.bean.OptionGroup;
+import com.atguigu.gmall0105.publisher.bean.SaleInfo;
 import com.atguigu.gmall0105.publisher.service.PublisherService;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class PublisherController {
@@ -85,6 +85,68 @@ public class PublisherController {
             e.printStackTrace();
         }
         return ydatestr;
+    }
+
+    @GetMapping("sale_detail")
+    public String getSaleDetail(@RequestParam("date")String date ,@RequestParam("startpage") int startpage,@RequestParam("size") int size,@RequestParam("keyword")String keyword){
+        Map saleMap = publisherService.getSaleDetail(date, keyword, startpage, size);
+        Long total = (Long)saleMap.get("total");
+        List<Map> saleDetailList = (List)saleMap.get("detail");
+        Map ageMap =(Map) saleMap.get("ageMap");
+        Map genderMap =(Map) saleMap.get("genderMap");
+
+
+
+        //  genderMap 整理成为  OptionGroup
+        Long femaleCount =(Long) genderMap.get("F");
+        Long maleCount =(Long) genderMap.get("M");
+        double femaleRate = Math.round(femaleCount * 1000D / total) / 10D;
+        double maleRate = Math.round(maleCount * 1000D / total) / 10D;
+        List<Option> genderOptions=new ArrayList<>();
+        genderOptions.add( new Option("男", maleRate));
+        genderOptions.add( new Option("女", femaleRate));
+        OptionGroup genderOptionGroup = new OptionGroup("性别占比", genderOptions);
+        //  ageMap 整理成为  OptionGroup
+
+        Long age_20Count=0L;
+        Long age20_30Count=0L;
+        Long age30_Count=0L;
+
+
+        for (Object o : ageMap.entrySet()) {
+            Map.Entry entry = (Map.Entry) o;
+            String agekey =(String) entry.getKey();
+            int age = Integer.parseInt(agekey);
+            Long ageCount =(Long) entry.getValue();
+            if(age <20){
+                age_20Count+=ageCount;
+            }else   if(age>=20&&age<30){
+                age20_30Count+=ageCount;
+            }else{
+                age30_Count+=ageCount;
+            }
+        }
+
+        Double age_20rate=0D;
+        Double age20_30rate=0D;
+        Double age30_rate=0D;
+
+        age_20rate = Math.round(age_20Count * 1000D / total) / 10D;
+        age20_30rate = Math.round(age20_30Count * 1000D / total) / 10D;
+        age30_rate = Math.round(age30_Count * 1000D / total) / 10D;
+        List<Option> ageOptions=new ArrayList<>();
+        ageOptions.add( new Option("20岁以下",age_20rate));
+        ageOptions.add( new Option("20岁到30岁",age20_30rate));
+        ageOptions.add( new Option("30岁以上",age30_rate));
+        OptionGroup ageOptionGroup = new OptionGroup("年龄占比", ageOptions);
+
+        List<OptionGroup> optionGroupList=new ArrayList<>();
+        optionGroupList.add(genderOptionGroup);
+        optionGroupList.add(ageOptionGroup);
+
+        SaleInfo saleInfo = new SaleInfo(total, optionGroupList, saleDetailList);
+
+        return  JSON.toJSONString(saleInfo);
     }
 
 }
